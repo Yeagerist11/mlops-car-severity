@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -46,11 +45,18 @@ pipeline {
                 }
             }
         }
+
+        stage('Archive Trained Model') {
+            steps {
+                archiveArtifacts artifacts: 'source/models/car_severity_model.joblib',
+                                fingerprint: true
+            }
+        }
     }
 
     post {
         success {
-            echo 'MLOps pipeline completed successfully. Model training and tests passed.'
+            echo 'MLOps pipeline completed successfully. Model training, tests, and artifact archiving passed.'
         }
 
         failure {
