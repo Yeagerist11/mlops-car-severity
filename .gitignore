@@ -14,3 +14,10 @@ __pycache__/
 
 # Generated model files
 models/*.joblib
+
+# MLflow local tracking data
+mlflow.db
+mlflow.db-shm
+mlflow.db-wal
+mlruns/
+mlartifacts/

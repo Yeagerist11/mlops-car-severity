@@ -2,6 +2,10 @@
 pipeline {
     agent any
 
+    environment {
+        MLFLOW_TRACKING_URI = 'sqlite:///C:/Users/Akshay.MS/.jenkins/workspace/Car-Severity-MLOps/mlflow.db'
+    }
+
     stages {
         stage('Checkout from Git') {
             steps {
@@ -27,7 +31,7 @@ pipeline {
             }
         }
 
-        stage('Train Model') {
+        stage('Train Model with MLflow') {
             steps {
                 dir('source') {
                     bat '.venv\\Scripts\\python.exe train.py'
@@ -41,6 +45,16 @@ pipeline {
                     bat '.venv\\Scripts\\python.exe -m pytest -v'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'MLOps pipeline completed successfully. Model training and tests passed.'
+        }
+
+        failure {
+            echo 'MLOps pipeline failed. Check the console output for details.'
         }
     }
 }
