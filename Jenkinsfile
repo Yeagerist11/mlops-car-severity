@@ -3,16 +3,42 @@ pipeline {
     agent any
 
     stages {
-        stage('Check Python') {
+        stage('Checkout from Git') {
             steps {
-                bat 'D:\\mlops-car-severity\\.venv\\Scripts\\python.exe --version'
+                bat 'if exist source rmdir /s /q source'
+                bat 'git clone --branch main https://github.com/Yeagerist11/mlops-car-severity.git source'
+            }
+        }
+
+        stage('Create Python Environment') {
+            steps {
+                dir('source') {
+                    bat 'py -3.14 -m venv .venv'
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('source') {
+                    bat '.venv\\Scripts\\python.exe -m pip install --upgrade pip'
+                    bat '.venv\\Scripts\\python.exe -m pip install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Train Model') {
+            steps {
+                dir('source') {
+                    bat '.venv\\Scripts\\python.exe train.py'
+                }
             }
         }
 
         stage('Run Model Tests') {
             steps {
-                dir('D:\\mlops-car-severity') {
-                    bat 'D:\\mlops-car-severity\\.venv\\Scripts\\python.exe -m pytest -v'
+                dir('source') {
+                    bat '.venv\\Scripts\\python.exe -m pytest -v'
                 }
             }
         }
