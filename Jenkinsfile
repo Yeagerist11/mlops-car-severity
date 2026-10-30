@@ -47,6 +47,7 @@ pipeline {
             }
         }
 
+
         stage('Build Docker Image') {
             steps {
                 dir('source') {
