@@ -55,7 +55,15 @@ pipeline {
                 }
             }
         }
-
+        stage('Deploy Docker Container') {
+            steps {
+                dir('source') {
+                    bat '''
+                        powershell -NoProfile -ExecutionPolicy Bypass -Command "$container = docker ps -aq --filter 'name=^/car-severity-container$'; if ($container) { docker rm -f car-severity-container; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }; docker run -d --restart unless-stopped --name car-severity-container -p 8000:8000 car-severity-api:latest; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+                    '''
+        }
+    }
+}
         stage('Archive Trained Model') {
             steps {
                 archiveArtifacts artifacts: 'source/models/car_severity_model.joblib',
