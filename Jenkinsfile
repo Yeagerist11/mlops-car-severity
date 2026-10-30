@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout from Git') {
             steps {
                 bat 'if exist source rmdir /s /q source'
@@ -47,7 +48,6 @@ pipeline {
             }
         }
 
-
         stage('Build Docker Image') {
             steps {
                 dir('source') {
@@ -56,15 +56,25 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy Docker Container') {
             steps {
                 dir('source') {
                     bat '''
                         powershell -NoProfile -ExecutionPolicy Bypass -Command "$container = docker ps -aq --filter 'name=^/car-severity-container$'; if ($container) { docker rm -f car-severity-container; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }; docker run -d --restart unless-stopped --name car-severity-container -p 8000:8000 car-severity-api:latest; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
                     '''
+                }
+            }
         }
-    }
-}
+
+        stage('Verify Deployment') {
+            steps {
+                dir('source') {
+                    bat '.venv\\Scripts\\python.exe health_check.py'
+                }
+            }
+        }
+
         stage('Archive Trained Model') {
             steps {
                 archiveArtifacts artifacts: 'source/models/car_severity_model.joblib',
@@ -75,7 +85,7 @@ pipeline {
 
     post {
         success {
-            echo 'MLOps pipeline completed successfully. Model training, tests, Docker build, and artifact archiving passed.'
+            echo 'MLOps pipeline completed successfully. Model training, tests, Docker build, deployment health check, and artifact archiving passed.'
         }
 
         failure {
