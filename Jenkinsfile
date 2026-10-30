@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -46,6 +47,15 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                dir('source') {
+                    bat 'docker --version'
+                    bat 'docker build -t car-severity-api:%BUILD_NUMBER% -t car-severity-api:latest .'
+                }
+            }
+        }
+
         stage('Archive Trained Model') {
             steps {
                 archiveArtifacts artifacts: 'source/models/car_severity_model.joblib',
@@ -56,7 +66,7 @@ pipeline {
 
     post {
         success {
-            echo 'MLOps pipeline completed successfully. Model training, tests, and artifact archiving passed.'
+            echo 'MLOps pipeline completed successfully. Model training, tests, Docker build, and artifact archiving passed.'
         }
 
         failure {

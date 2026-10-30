@@ -3,23 +3,23 @@ import joblib
 import pandas as pd
 from pathlib import Path
 
-# 1. Find the saved model
-model_path = Path("models") / "car_severity_model.joblib"
-
-# 2. Load the trained model
+# Load the trained model
+model_path = Path("models/car_severity_model.joblib")
 model = joblib.load(model_path)
 
-# 3. Prepare new accident details
-new_accident = pd.DataFrame([
-    {
-        "impact_speed": 72,
-        "damage_score": 8,
-        "airbag_deployed": 1
-    }
-])
+# Get accident details from the user
+speed = float(input("Enter impact speed: "))
+damage = int(input("Enter damage score (1-10): "))
+airbag = int(input("Was the airbag deployed? (1 = Yes, 0 = No): "))
 
-# 4. Predict the severity
-prediction = model.predict(new_accident)
+# Prepare input in the same format used during training
+accident = pd.DataFrame([{
+    "impact_speed": speed,
+    "damage_score": damage,
+    "airbag_deployed": airbag
+}])
 
-# 5. Display the result
+# Predict severity
+prediction = model.predict(accident)
+
 print("Predicted accident severity:", prediction[0])
